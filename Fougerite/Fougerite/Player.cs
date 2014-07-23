@@ -177,16 +177,14 @@
 
         public void SafeTeleportTo(Fougerite.Player p, [Optional, DefaultParameterValue(1.5f)] float distance)
         { 
-            Ray ray = p.PlayerClient.controllable.character.eyesRay;
-            Ray reflect = new Ray(ray.origin, Vector3.Reflect(ray.direction, ray.direction));
             Vector3 target;
             if (this.Admin) {
-                target = reflect.GetPoint(distance); // rcon admin teleports behind target player
+                target = p.PlayerClient.controllable.transform.TransformPoint(new Vector3(0, 0, -distance)); // rcon admin teleports behind target player
             } else {
-                target = ray.GetPoint(distance);     // non-admins teleport in front of target player
+                target = p.PlayerClient.controllable.transform.TransformPoint(new Vector3(0, 0, distance)); // non-admins teleport in front of target player
             }
             this.SafeTeleportTo(target.x, target.z);
-            this.ourPlayer.controllable.transform.LookAt(ray.origin);  // turn towards the target player
+            this.ourPlayer.controllable.transform.LookAt(p.PlayerClient.controllable.transform.position);  // turn towards the target player
         }
 
         public void SafeTeleportTo(Vector3 target)
