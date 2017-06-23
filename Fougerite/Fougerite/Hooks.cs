@@ -1827,6 +1827,19 @@ namespace Fougerite
                 sw = new Stopwatch();
                 sw.Start();
             }
+            if (errornum == "Facepunch_Connector_Cancelled")
+            {
+                foreach (ModuleContainer m in ModuleManager.Modules.Where(m => m.Plugin.Name.Equals("RustBusterServer2016")))
+                {
+                    if (sw != null)
+                    {
+                        sw.Stop();
+                        if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("Airdrop Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
+                    }
+                    return
+                }
+            }
+                    
             SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum);
             try
             {
