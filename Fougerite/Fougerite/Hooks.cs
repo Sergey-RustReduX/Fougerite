@@ -1834,7 +1834,7 @@ namespace Fougerite
                     if (sw != null)
                     {
                         sw.Stop();
-                        if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("Airdrop Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
+                        if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("SteamDeny Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
                     }
                     return
                 }
@@ -1857,7 +1857,7 @@ namespace Fougerite
                 if (sw != null)
                 {
                     sw.Stop();
-                    if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("Airdrop Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
+                    if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("SteamDeny Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
                 }
                 return;
             }
