@@ -21,7 +21,7 @@ namespace Fougerite
         public static IEnumerable<string> ForceCallForCommands = new List<string>();
         private readonly string path = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
         private readonly List<string> _ConsoleCommandCancelList = new List<string>();
-
+        public static bool RustBusterActive = false;
 
         public void LookForRustPP()
         {
@@ -31,6 +31,19 @@ namespace Fougerite
                 HRustPP = true;
                 break;
             }
+        }
+
+        public static bool CheckRustBusterActive()
+        {
+            if( !RustBusterActive)
+            {
+                foreach (ModuleContainer m in ModuleManager.Modules.Where(m => m.Plugin.Name.Equals("RustBusterServer")))
+                {
+                    RustBusterActive = true;
+                    break;
+                }
+            }
+            return RustBusterActive;
         }
 
         internal void UpdateBanlist()
