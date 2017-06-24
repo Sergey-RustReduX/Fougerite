@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Schema.Generation;
+using Newtonsoft.Json.Converters;
+using UnityEngine;
 
 namespace Fougerite
 {
@@ -127,6 +129,51 @@ namespace Fougerite
         public static JsonAPI GetInstance
         {
             get { return _inst ?? (_inst = new JsonAPI()); }
+        }
+
+        public static void SaveFile<T>(T obj, string path)
+        {
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.Converters.Add(new JavaScriptDateTimeConverter());
+            serializer.NullValueHandling = NullValueHandling.Ignore;
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                StreamWriter sw = File.CreateText(path);
+
+                using (JsonWriter writerr = new JsonTextWriter(sw))
+                {
+                    serializer.Serialize(writerr, obj);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Error saveFile: " + ex);
+            }
+        }
+
+        public static T ReadyFile<T>(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    return JsonConvert.DeserializeObject<T>(File.ReadAllText(path));
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Error saveFile: " + ex);
+                return default(T);
+            }
         }
     }
 }
