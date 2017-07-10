@@ -37,7 +37,7 @@ namespace Fougerite
         {
             if( !RustBusterActive)
             {
-                foreach (ModuleContainer m in ModuleManager.Modules.Where(m => m.Plugin.Name.Equals("RustBusterServer")))
+                foreach (ModuleContainer m in ModuleManager.Modules.Where(m => m.Plugin.Name.Equals("RustBuster2016Server")))
                 {
                     RustBusterActive = true;
                     break;
