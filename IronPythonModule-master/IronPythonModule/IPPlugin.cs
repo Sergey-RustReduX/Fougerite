@@ -513,6 +513,16 @@ namespace IronPythonModule {
             this.Invoke("On_PlayerBan", new object[] { be });
         }
 
+        public void OnRepairBench(Fougerite.Events.RepairEvent be)
+        {
+            this.Invoke("On_RepairBench", new object[] { be });
+        }
+
+        public void OnItemMove(ItemMoveEvent be)
+        {
+            this.Invoke("On_ItemMove", new object[] { be });
+        }
+
         /*public void OnTimerCB(IPTimedEvent evt) {
 			if (Globals.Contains(evt.Name + "Callback")) {
 				Invoke(evt.Name + "Callback", evt);

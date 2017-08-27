@@ -10,7 +10,7 @@ namespace Fougerite
 {
     public class Loom : MonoBehaviour
     {
-        public static int maxThreads = 50;
+        public static int maxThreads = 30;
         private static Loom _current;
         internal static int numThreads;
         internal static bool initialized = false;

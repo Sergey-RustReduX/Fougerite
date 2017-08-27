@@ -74,6 +74,8 @@ namespace Fougerite
         public static event BowShootEventDelegate OnBowShoot;
         public static event GrenadeThrowEventDelegate OnGrenadeThrow;
         public static event BanEventDelegate OnPlayerBan;
+        public static event RepairBenchEventDelegate OnRepairBench;
+        public static event ItemMoveEventDelegate OnItemMove;
         public static bool IsShuttingDown = false;
 
         public static readonly List<ulong> uLinkDCCache = new List<ulong>(); 
@@ -638,17 +640,6 @@ namespace Fougerite
                 if (decayList.Contains(he.Entity))
                     he.IsDecay = true;
 
-                if (ent.IsStructure() && !he.IsDecay)
-                {
-                    StructureComponent component = ent.Object as StructureComponent;
-                    if (component != null &&
-                        ((component.IsType(StructureComponent.StructureComponentType.Ceiling) ||
-                          component.IsType(StructureComponent.StructureComponentType.Foundation)) ||
-                         component.IsType(StructureComponent.StructureComponentType.Pillar)))
-                    {
-                        he.DamageAmount = 0f;
-                    }
-                }
                 try
                 {
                     if (OnEntityHurt != null)
@@ -659,6 +650,17 @@ namespace Fougerite
                 catch (Exception ex)
                 {
                     Logger.LogError("EntityHurtEvent Error: " + ex);
+                }
+                if (ent.IsStructure() && !he.IsDecay)
+                {
+                    StructureComponent component = ent.Object as StructureComponent;
+                    if (component != null &&
+                        ((component.IsType(StructureComponent.StructureComponentType.Ceiling) ||
+                          component.IsType(StructureComponent.StructureComponentType.Foundation)) ||
+                         component.IsType(StructureComponent.StructureComponentType.Pillar)))
+                    {
+                        he.DamageAmount = 0f;
+                    }
                 }
                 if (!tkd.takenodamage)
                 {
@@ -2275,6 +2277,194 @@ namespace Fougerite
             Logger.Log("[uLink Ignore] Ignored Socket from: " + ip);
         }
 
+        public static Inventory.SlotOperationResult FGSlotOperation(Inventory inst, int fromSlot, Inventory toInventory, int toSlot, Inventory.SlotOperationsInfo info)
+        {
+            IInventoryItem itemf;
+            IInventoryItem itemf2;
+            if (((byte)(((byte)Inventory.SlotOperations.Combine | (byte)Inventory.SlotOperations.Move | (byte)Inventory.SlotOperations.Stack) & (byte)info.SlotOperations)) == 0)
+            {
+                return Inventory.SlotOperationResult.Error_NoOpArgs;
+            }
+            if ((inst == null) || (toInventory == null))
+            {
+                return Inventory.SlotOperationResult.Error_MissingInventory;
+            }
+            if (inst == toInventory)
+            {
+                if (toSlot == fromSlot)
+                {
+                    return Inventory.SlotOperationResult.Error_SameSlot;
+                }
+                if ((((byte)((byte)Inventory.SlotOperations.EnsureAuthenticLooter & (byte)info.SlotOperations)) == 0x80) && !inst.IsAnAuthorizedLooter(info.Looter, ((byte)((byte)Inventory.SlotOperations.ReportCheater & (byte)info.SlotOperations)) == 0x40, "slotop_srcdst"))
+                {
+                    return Inventory.SlotOperationResult.Error_NotALooter;
+                }
+            }
+            else if (((byte)((byte)Inventory.SlotOperations.EnsureAuthenticLooter & (byte)info.SlotOperations)) == 0x80)
+            {
+                bool reportCheater = ((byte)((byte)Inventory.SlotOperations.ReportCheater & (byte)info.SlotOperations)) == 0x40;
+                if (!inst.IsAnAuthorizedLooter(info.Looter, reportCheater, "slotop_src") || !toInventory.IsAnAuthorizedLooter(info.Looter, reportCheater, "slotop_dst"))
+                {
+                    ItemMoveEvent ime4 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
+                    if (ime4.Player != null)
+                    {
+                        Logger.LogError("[ItemLoot] The Game says " + ime4.Player.Name +
+                                        " probably cheats with inv. Report this to DreTaX on fougerite.com");
+                    }
+                    return Inventory.SlotOperationResult.Error_NotALooter;
+                }
+            }
+            
+            if (!inst.GetItem(fromSlot, out itemf))
+            {
+                return Inventory.SlotOperationResult.Error_EmptySourceSlot;
+            }
+            if (toInventory.GetItem(toSlot, out itemf2))
+            {
+                InventoryItem.MergeResult failed;
+                inst.MarkSlotDirty(fromSlot);
+                toInventory.MarkSlotDirty(toSlot);
+                if ((((byte)(((byte)Inventory.SlotOperations.Combine | (byte)Inventory.SlotOperations.Stack) & (byte)info.SlotOperations)) == 1) && (itemf.datablock.uniqueID == itemf2.datablock.uniqueID))
+                {
+                    failed = itemf.TryStack(itemf2);
+                }
+                else if (((byte)(((byte)Inventory.SlotOperations.Combine | (byte)Inventory.SlotOperations.Stack) & (byte)info.SlotOperations)) != 0)
+                {
+                    failed = itemf2.TryCombine(itemf2);
+                }
+                else
+                {
+                    failed = InventoryItem.MergeResult.Failed;
+                }
+                switch (failed)
+                {
+                    case InventoryItem.MergeResult.Merged:
+                        ItemMoveEvent ime2 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
+                        try
+                        {
+                            if (OnItemMove != null)
+                            {
+                                OnItemMove(ime2);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogError("ItemMoveEvent Error: " + ex);
+                        }
+                        return Inventory.SlotOperationResult.Success_Stacked;
+
+                    case InventoryItem.MergeResult.Combined:
+                        ItemMoveEvent ime3 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
+                        try
+                        {
+                            if (OnItemMove != null)
+                            {
+                                OnItemMove(ime3);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogError("ItemMoveEvent Error: " + ex);
+                        }
+                        return Inventory.SlotOperationResult.Success_Combined;
+                }
+                if (((byte)((byte)Inventory.SlotOperations.Move & (byte)info.SlotOperations)) == 4)
+                {
+                    return Inventory.SlotOperationResult.Error_OccupiedDestination;
+                }
+                return Inventory.SlotOperationResult.NoOp;
+            }
+            if (((byte)((byte)Inventory.SlotOperations.Move & (byte)info.SlotOperations)) == 0)
+            {
+                return Inventory.SlotOperationResult.Error_EmptyDestinationSlot;
+            }
+            if (!inst.MoveItemAtSlotToEmptySlot(toInventory, fromSlot, toSlot))
+            {
+                return Inventory.SlotOperationResult.Error_Failed;
+            }
+            if (inst != null)
+            {
+                inst.MarkSlotDirty(fromSlot);
+            }
+            if (toInventory != null)
+            {
+                toInventory.MarkSlotDirty(toSlot);
+            }
+            ItemMoveEvent ime = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
+            try
+            {
+                if (OnItemMove != null)
+                {
+                    OnItemMove(ime);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("ItemMoveEvent Error: " + ex);
+            }
+            return Inventory.SlotOperationResult.Success_Moved;
+
+        }
+
+        public static bool FGCompleteRepair(RepairBench inst, Inventory ingredientInv)
+        {
+            BlueprintDataBlock block;
+            if (!inst.CanRepair(ingredientInv))
+            {
+                return false;
+            }
+            IInventoryItem repairItem = inst.GetRepairItem();
+            if (!BlueprintDataBlock.FindBlueprintForItem<BlueprintDataBlock>(repairItem.datablock, out block))
+            {
+                return false;
+            }
+            RepairEvent re = new RepairEvent(inst, ingredientInv);
+            try
+            {
+                if (OnRepairBench != null)
+                {
+                    OnRepairBench(re);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("RepairEvent Error: " + ex);
+            }
+            if (re._cancel)
+            {
+                return false;
+            }
+            for (int i = 0; i < block.ingredients.Length; i++)
+            {
+                BlueprintDataBlock.IngredientEntry entry = block.ingredients[i];
+                int count = Mathf.RoundToInt(block.ingredients[i].amount * inst.GetResourceScalar());
+                if (count > 0)
+                {
+                    while (count > 0)
+                    {
+                        int totalNum = 0;
+                        IInventoryItem item2 = ingredientInv.FindItem(entry.Ingredient, out totalNum);
+                        if (item2 != null)
+                        {
+                            if (item2.Consume(ref count))
+                            {
+                                ingredientInv.RemoveItem(item2.slot);
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            float num4 = repairItem.maxcondition - repairItem.condition;
+            float num5 = (num4 * 0.2f) + 0.05f;
+            repairItem.SetMaxCondition(repairItem.maxcondition - num5);
+            repairItem.SetCondition(repairItem.maxcondition);
+            return true;
+        }
+
         public static bool OnBanEventHandler(BanEvent be)
         {
             try
@@ -2438,6 +2628,12 @@ namespace Fougerite
             OnPlayerBan = delegate (BanEvent param0)
             {
             };
+            OnRepairBench = delegate (RepairEvent param0)
+            {
+            };
+            OnItemMove = delegate (ItemMoveEvent param0)
+            {
+            };
             foreach (Fougerite.Player player in Fougerite.Server.GetServer().Players)
             {
                 player.FixInventoryRef();
@@ -2588,6 +2784,8 @@ namespace Fougerite
         public delegate void BowShootEventDelegate(BowShootEvent bowshootEvent);
         public delegate void GrenadeThrowEventDelegate(GrenadeThrowEvent grenadeThrowEvent);
         public delegate void BanEventDelegate(BanEvent banEvent);
+        public delegate void RepairBenchEventDelegate(RepairEvent repairEvent);
+        public delegate void ItemMoveEventDelegate(ItemMoveEvent itemMoveEvent);
         //public delegate void AirdropCrateDroppedDelegate(GameObject go);
     }
 }

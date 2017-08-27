@@ -157,6 +157,8 @@ namespace MagmaModule
                     case "On_FallDamage": Hooks.OnFallDamage += OnFallDamage; break;
                     case "On_LootUse": Hooks.OnLootUse += OnLootUse; break;
                     case "On_PlayerBan": Hooks.OnPlayerBan += OnBanEvent; break;
+                    case "On_RepairBench": Hooks.OnRepairBench += OnRepairBench; break;
+                    case "On_ItemMove": Hooks.OnItemMove += OnItemMove; break;
                 }
             }
         }
@@ -217,6 +219,8 @@ namespace MagmaModule
                     case "On_FallDamage": Hooks.OnFallDamage -= OnFallDamage; break;
                     case "On_LootUse": Hooks.OnLootUse -= OnLootUse; break;
                     case "On_PlayerBan": Hooks.OnPlayerBan -= OnBanEvent; break;
+                    case "On_RepairBench": Hooks.OnRepairBench -= OnRepairBench; break;
+                    case "On_ItemMove": Hooks.OnItemMove -= OnItemMove; break;
                 }
             }
         }
@@ -672,6 +676,16 @@ namespace MagmaModule
         public void OnLootUse(LootStartEvent le)
         {
             Invoke("On_LootUse", le);
+        }
+
+        public void OnRepairBench(Fougerite.Events.RepairEvent be)
+        {
+            Invoke("On_RepairBench", be);
+        }
+
+        public void OnItemMove(ItemMoveEvent be)
+        {
+            Invoke("On_ItemMove", be);
         }
 
         public void OnTimerCB(string name)

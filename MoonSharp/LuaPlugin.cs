@@ -300,17 +300,27 @@ namespace MoonSharpModule
 
         public void OnPluginShutdown()
         {
-            Invoke("On_PluginShutdown", new object[0]);
+            this.Invoke("On_PluginShutdown", new object[0]);
         }
 
         public void OnLootUse(LootStartEvent le)
         {
-            Invoke("On_LootUse", new object[] { le });
+            this.Invoke("On_LootUse", new object[] { le });
         }
 
         public void OnBanEvent(BanEvent be)
         {
-            Invoke("On_PlayerBan", new object[] { be });
+            this.Invoke("On_PlayerBan", new object[] { be });
+        }
+   
+        public void OnRepairBench(Fougerite.Events.RepairEvent be)
+        {
+            this.Invoke("On_RepairBench", new object[] { be });
+        }
+
+        public void OnItemMove(ItemMoveEvent be)
+        {
+            this.Invoke("On_ItemMove", new object[] { be });
         }
 
         public void OnTimerCB(MoonSharpTE evt)

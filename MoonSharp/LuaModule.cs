@@ -273,6 +273,8 @@ namespace MoonSharpModule
                     case "On_FallDamage": Hooks.OnFallDamage += new Hooks.FallDamageDelegate(plugin.OnFallDamage); break;
                     case "On_LootUse": Hooks.OnLootUse += new Hooks.LootEnterDelegate(plugin.OnLootUse); break;
                     case "On_PlayerBan": Hooks.OnPlayerBan += new Hooks.BanEventDelegate(plugin.OnBanEvent); break;
+                    case "On_RepairBench": Hooks.OnRepairBench += new Hooks.RepairBenchEventDelegate(plugin.OnRepairBench); break;
+                    case "On_ItemMove": Hooks.OnItemMove += new Hooks.ItemMoveEventDelegate(plugin.OnItemMove); break;
                     //TODO: Oxide Hook Names
                     /*case "Init": plugin.Invoke("Init", new object[0]); break;
                     //case "ModifyDamage": Hooks.OnDoorUse += new Hooks.DoorOpenHandlerDelegate(plugin); break;
@@ -349,6 +351,8 @@ namespace MoonSharpModule
                     case "On_FallDamage": Hooks.OnFallDamage -= new Hooks.FallDamageDelegate(plugin.OnFallDamage); break;
                     case "On_LootUse": Hooks.OnLootUse -= new Hooks.LootEnterDelegate(plugin.OnLootUse); break;
                     case "On_PlayerBan": Hooks.OnPlayerBan -= new Hooks.BanEventDelegate(plugin.OnBanEvent); break;
+                    case "On_RepairBench": Hooks.OnRepairBench -= new Hooks.RepairBenchEventDelegate(plugin.OnRepairBench); break;
+                    case "On_ItemMove": Hooks.OnItemMove -= new Hooks.ItemMoveEventDelegate(plugin.OnItemMove); break;
                 }
             }
         }

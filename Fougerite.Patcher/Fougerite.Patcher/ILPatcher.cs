@@ -326,6 +326,46 @@ namespace Fougerite.Patcher
             iLProcessor.InsertAfter(doDecay.Body.Instructions[0], Instruction.Create(OpCodes.Brtrue, doDecay.Body.Instructions[doDecay.Body.Instructions.Count - 1]));
         }
 
+        private void SlotOperationPatch()
+        {
+            TypeDefinition type = rustAssembly.MainModule.GetType("Inventory");
+            IEnumerable<MethodDefinition> allmethods = type.GetMethods();
+            MethodDefinition SlotOperation = null;
+            foreach (MethodDefinition m in allmethods)
+            {
+                if (m.Name.Equals("SlotOperation") && m.Parameters.Count == 4)
+                {
+                    SlotOperation = m;
+                    break;
+                }
+            }
+            if (SlotOperation != null)
+            {
+                MethodDefinition method = hooksClass.GetMethod("FGSlotOperation");
+                SlotOperation.Body.Instructions.Clear();
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_S, SlotOperation.Parameters[3]));
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
+                SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            }
+        }
+
+        private void RepairBenchEvent()
+        {
+            TypeDefinition type = rustAssembly.MainModule.GetType("RepairBench");
+            MethodDefinition CompleteRepair = type.GetMethod("CompleteRepair");
+            MethodDefinition method = hooksClass.GetMethod("FGCompleteRepair");
+            CompleteRepair.Body.Instructions.Clear();
+            CompleteRepair.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            CompleteRepair.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+            CompleteRepair.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
+            CompleteRepair.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+
+
         private void FieldsUpdatePatch()
         {
             TypeDefinition Metabolism = rustAssembly.MainModule.GetType("Metabolism");
@@ -354,6 +394,10 @@ namespace Fougerite.Patcher
 
             TypeDefinition PlayerInventory = rustAssembly.MainModule.GetType("PlayerInventory");
             PlayerInventory.GetField("_boundBPs").SetPublic(true);
+
+            TypeDefinition Inv2 = rustAssembly.MainModule.GetType("Inventory");
+            Inv2.GetNestedType("SlotOperationsInfo").IsPublic = true;
+            Inv2.GetNestedType("SlotOperations").IsPublic = true;
 
             TypeDefinition BasicDoor = rustAssembly.MainModule.GetType("BasicDoor");
             BasicDoor.GetField("state").SetPublic(true);
@@ -1482,6 +1526,8 @@ namespace Fougerite.Patcher
                     this.ShotgunShootPatch();
                     this.GrenadePatch();
                     this.PatchuLink();
+                    this.SlotOperationPatch();
+                    this.RepairBenchEvent();
                 }
                 catch (Exception ex)
                 {

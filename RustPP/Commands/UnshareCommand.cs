@@ -33,9 +33,8 @@ namespace RustPP.Commands
                     if (Core.userCache[id].Equals(playerName, StringComparison.OrdinalIgnoreCase))
                     {
                         UnshareDoors(new PList.Player(id, Core.userCache[id]), pl);
-                        return;
                     }
-                    if (Core.userCache[id].ToUpperInvariant().Contains(playerName.ToUpperInvariant()))
+                    else if (Core.userCache[id].ToUpperInvariant().Contains(playerName.ToUpperInvariant()))
                         list.Add(id, Core.userCache[id]);
                 } else
                 {
@@ -45,8 +44,9 @@ namespace RustPP.Commands
                         if (client.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase))
                         {
                             UnshareDoors(new PList.Player(id, client.Name), pl);
-                            return;
                         }
+                        else if (Core.userCache[id].ToUpperInvariant().Contains(playerName.ToUpperInvariant()))
+                            list.Add(id, Core.userCache[id]);
                     }
                 }
             }
@@ -80,9 +80,8 @@ namespace RustPP.Commands
         public void UnshareDoors(PList.Player exfriend, Fougerite.Player unsharing)
         {
             ShareCommand command = (ShareCommand)ChatCommand.GetCommand("share");
-            ArrayList list = (ArrayList)command.GetSharedDoors()[unsharing.UID];
 
-            list.Remove(exfriend.UserID);
+            ((ArrayList)command.GetSharedDoors()[unsharing.UID]).Remove(exfriend.UserID);
             unsharing.MessageFrom(Core.Name, string.Format("{0} can use your doors no longer.", exfriend.DisplayName));
             Fougerite.Player client = Fougerite.Server.GetServer().FindPlayer(exfriend.UserID.ToString());
             if (client != null)

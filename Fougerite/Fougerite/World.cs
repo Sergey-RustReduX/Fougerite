@@ -407,6 +407,10 @@
         {
             try
             {
+                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                {
+                    Logger.LogWarning("[Fougerite BasicDoors] Some plugin is calling World.BasicDoors in a Thread/Timer. This is dangerous, and may cause crashes.");
+                }
                 if (!this.cache.ContainsKey("BasicDoor") || forceupdate || this.doors.Count == 0)
                 {
                     this.cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
@@ -440,6 +444,10 @@
         {
             try
             {
+                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                {
+                    Logger.LogWarning("[Fougerite DeployableObjects] Some plugin is calling World.DeployableObjects in a Thread/Timer. This is dangerous, and may cause crashes.");
+                }
                 if (!this.cache.ContainsKey("DeployableObject") || forceupdate || this.deployables.Count == 0)
                 {
                     this.cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
@@ -473,6 +481,10 @@
         {
             try
             {
+                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                {
+                    Logger.LogWarning("[Fougerite StructureComponents] Some plugin is calling World.StructureComponents in a Thread/Timer. This is dangerous, and may cause crashes.");
+                }
                 if (!this.cache.ContainsKey("StructureComponent") || forceupdate || this.structures.Count == 0)
                 {
                     this.cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
@@ -508,6 +520,10 @@
         {
             try
             {
+                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                {
+                    Logger.LogWarning("[Fougerite StructureMasters] Some plugin is calling World.StructureMasters in a Thread/Timer. This is dangerous, and may cause crashes.");
+                }
                 if (!this.cache.ContainsKey("StructureMaster") || forceupdate || this.structurems.Count == 0)
                 {
                     this.cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
@@ -541,6 +557,10 @@
         {
             get
             {
+                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                {
+                    Logger.LogWarning("[Fougerite LootableObjects] Some plugin is calling World.LootableObjects in a Thread/Timer. This is dangerous, and may cause crashes.");
+                }
                 IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<LootableObject>()
                                              select new Entity(s);
                 return source.ToList();
@@ -551,6 +571,10 @@
         {
             get
             {
+                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                {
+                    Logger.LogWarning("[Fougerite SupplyCrates] Some plugin is calling World.SupplyCrates in a Thread/Timer. This is dangerous, and may cause crashes.");
+                }
                 IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<SupplyCrate>()
                                              select new Entity(s);
                 return source.ToList();
@@ -563,6 +587,10 @@
             {
                 try
                 {
+                    if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
+                    {
+                        Logger.LogWarning("[Fougerite Entities] Some plugin is calling World.Entities in a Thread/Timer. This is dangerous, and may cause crashes.");
+                    }
                     var structs = UnityEngine.Object.FindObjectsOfType<StructureComponent>();
                     var deployables = UnityEngine.Object.FindObjectsOfType<DeployableObject>();
                     var crates = UnityEngine.Object.FindObjectsOfType<SupplyCrate>();

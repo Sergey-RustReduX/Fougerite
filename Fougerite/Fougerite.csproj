@@ -46,7 +46,9 @@
     <Compile Include="Fougerite\Events\BanEvent.cs" />
     <Compile Include="Fougerite\Events\BowShootEvent.cs" />
     <Compile Include="Fougerite\Events\GrenadeThrowEvent.cs" />
+    <Compile Include="Fougerite\Events\ItemMoveEvent.cs" />
     <Compile Include="Fougerite\Events\LootStartEvent.cs" />
+    <Compile Include="Fougerite\Events\RepairEvent.cs" />
     <Compile Include="Fougerite\Events\ShootEvent.cs" />
     <Compile Include="Fougerite\Events\ShotgunShootEvent.cs" />
     <Compile Include="Fougerite\JsonAPI.cs" />
@@ -55,7 +57,7 @@
     <Compile Include="Fougerite\ShutdownCatcher.cs" />
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\References\PatchedReferences\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\References\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Facepunch.HitBox, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
