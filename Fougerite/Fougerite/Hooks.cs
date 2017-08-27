@@ -78,7 +78,7 @@ namespace Fougerite
         public static event ItemMoveEventDelegate OnItemMove;
         public static bool IsShuttingDown = false;
 
-        public static readonly List<ulong> uLinkDCCache = new List<ulong>(); 
+        public static readonly List<ulong> uLinkDCCache = new List<ulong>();
 
         public static void BlueprintUse(IBlueprintItem item, BlueprintDataBlock bdb)
         {
@@ -1829,7 +1829,18 @@ namespace Fougerite
                 sw = new Stopwatch();
                 sw.Start();
             }
+
             SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum);
+
+            //kick player steamID Bugged
+            if (cc != null && cc.UserID == 76561197960266962)
+            {
+                strReason += ", SteamID Bugged";
+                errornum = NetError.Facepunch_Kick_Ban;
+                sde.ForceAllow = false;
+            }
+                    
+            //active event hook
             try
             {
                 if (OnSteamDeny != null)
@@ -1841,15 +1852,19 @@ namespace Fougerite
             {
                 Logger.LogError("SteamDenyEvent Error: " + ex);
             }
-            if (sde.ForceAllow)
+
+            //check rust cracked, bypass
+            if (errornum == NetError.Facepunch_Connector_Cancelled && Server.CheckRustBusterActive() || sde.ForceAllow)
             {
+                sde.ForceAllow = true;
                 if (sw != null)
                 {
                     sw.Stop();
-                    if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("Airdrop Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
+                    if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("SteamDeny Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
                 }
                 return;
             }
+
             string deny = "Auth failed: " + strReason + " - " + cc.UserName + " (" +
                        cc.UserID.ToString() +
                        ")";
@@ -1857,6 +1872,7 @@ namespace Fougerite
             approval.Deny((uLink.NetworkConnectionError)errornum);
             ConnectionAcceptor.CloseConnection(cc);
             Rust.Steam.Server.OnUserLeave(cc.UserID);
+
             if (sw == null) return;
             sw.Stop();
             if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("SteamDeny Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
