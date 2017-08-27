@@ -603,17 +603,6 @@ namespace Fougerite
                 var victim = he.Victim as NPC;
                 if (victim != null && victim.Health > 0f)
                 {
-                    try
-                    {
-                        if (OnNPCHurt != null)
-                        {
-                            OnNPCHurt(he);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError("NPCHurtEvent Error: " + ex.ToString());
-                    }
                     switch (e.status)
                     {
                         case LifeStatus.IsAlive:
