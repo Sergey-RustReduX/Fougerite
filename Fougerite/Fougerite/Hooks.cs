@@ -77,9 +77,25 @@ namespace Fougerite
         public static event BanEventDelegate OnPlayerBan;
         public static event RepairBenchEventDelegate OnRepairBench;
         public static event ItemMoveEventDelegate OnItemMove;
+        public static event ServerStartupEventDelegate OnServerStartup;
         public static bool IsShuttingDown = false;
 
-        public static readonly List<ulong> uLinkDCCache = new List<ulong>(); 
+        public static readonly List<ulong> uLinkDCCache = new List<ulong>();
+
+        public static void ServerDone()
+        {
+            if (OnServerStartup != null)
+            {
+                try
+                {
+                    OnServerStartup();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("BOnServerStartupEvent Error: " + ex.ToString());
+                }
+            }
+        }
 
         public static void BlueprintUse(IBlueprintItem item, BlueprintDataBlock bdb)
         {
@@ -543,7 +559,7 @@ namespace Fougerite
             he.DamageAmount = e.amount;
             if (he.VictimIsPlayer)
             {
-                Player vp = (Player) he.Victim;
+                Player vp = (Player)he.Victim;
                 try
                 {
                     if (OnPlayerHurt != null)
@@ -1277,9 +1293,15 @@ namespace Fougerite
             if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("TeleportEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
         }
 
+        internal static DateTime LasTime = DateTime.Now;
         public static void RecieveNetwork(Metabolism m, float cal, float water, float rad, float anti, float temp, float poison)
         {
-            bool h = false;
+            if (LasTime.AddMinutes(5) > DateTime.UtcNow)
+            {
+                LasTime = DateTime.Now;
+                Logger.LogWarning("[RecieveNetwork] A metabolism hack was prevented.");
+            }
+            /*bool h = false;
             Fougerite.Player p = null;
             if (m.playerClient != null)
             {
@@ -1383,7 +1405,7 @@ namespace Fougerite
             if (!h)
             {
                 RPOS.MetabolismUpdate();
-            }
+            }*/
         }
 
         public static void CraftingEvent(CraftingInventory inv, BlueprintDataBlock blueprint, int amount, ulong startTime)
@@ -1732,10 +1754,10 @@ namespace Fougerite
             }
             try
             {
-                foreach (var x in RPOS.AllWindows)
+                /*foreach (var x in RPOS.AllWindows)
                 {
                     Server.GetServer().Broadcast(x.name);
-                }
+                }*/
                 //RPOS.Get().
                 if (OnItemRemoved != null)
                 {
@@ -2235,7 +2257,7 @@ namespace Fougerite
                 if (user != null)
                 {
                     ulong id = user.userID;
-                    if (uLinkDCCache.Contains(id)){return;}
+                    if (uLinkDCCache.Contains(id)) { return; }
                     Logger.LogDebug("===Fougerite uLink===");
                     if (Fougerite.Server.Cache.ContainsKey(id))
                     {
@@ -2714,6 +2736,11 @@ namespace Fougerite
 
         public static bool ConfirmVoice(byte[] data)
         {
+            if (data == null)
+            {
+                Logger.LogWarning("[VoiceByteOverflown] Received null value.");
+                return false;
+            }
             if (data.Length > 1500)
             {
                 Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " + data.Length);
@@ -2836,6 +2863,7 @@ namespace Fougerite
         public delegate void BanEventDelegate(BanEvent banEvent);
         public delegate void RepairBenchEventDelegate(RepairEvent repairEvent);
         public delegate void ItemMoveEventDelegate(ItemMoveEvent itemMoveEvent);
+        public delegate void ServerStartupEventDelegate();
         //public delegate void AirdropCrateDroppedDelegate(GameObject go);
     }
 }
